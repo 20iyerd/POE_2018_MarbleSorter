@@ -1,18 +1,49 @@
-// Main arduino code with comms (I2C, UART) and pass Pixy info to VEX
-
+#include <Pixy.h>
+//#include <PixyI2C.h>
+#include <PixySPI_SS.h>
+//#include <PixyUART.h>
 #include <Wire.h>
+#include <TPixy.h>
+
+Pixy pixy;
+//PixyI2C pixy(0x54);
+int blocks;
+int marbleSignature;
+
 void setup() {
-  // put your setup code here, to run once:
-   Serial.begin(9600); 
+  // start serial port at 9600 bps:
+  Serial.begin(9600);  
+
+  Serial.print("Starting...\n");
+  pixy.init();//initializing pixy
 }
+
 
 void loop() {
   // put your main code here, to run repeatedly:
-  for(int i = 0; i < 10; i++)
+  blocks = pixy.getBlocks();
+  marbleSignature = pixy.blocks[0].signature; //get the signature color
+  
+  if((blocks < 2)&&(blocks))
   {
-    Serial.write('3');
-    //Serial.print('1');
-    delay(500);
+    if((pixy.blocks[0].width/pixy.blocks[0].height > 0.8) && (pixy.blocks[0].width/pixy.blocks[0].height < 1.2))
+    {
+      if(marbleSignature == 1)
+      {
+        Serial.write(1);
+        delay(1000);
+      }
+      else if(marbleSignature == 2)
+      {
+        Serial.write(2);
+        delay(1000);
+      }
+    }
+  }
+  else
+  {
+    Serial.write(3);
+    delay(1000);
   }
   
 }
